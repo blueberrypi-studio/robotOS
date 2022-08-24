@@ -1,3 +1,7 @@
+// =================================
+// Group 24 Arduino code
+// =================================
+
 char receivedChar;
 boolean newData, receivedNums = false;
 const byte ledPin = 13;
