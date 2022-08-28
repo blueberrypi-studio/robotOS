@@ -1,50 +1,71 @@
 // =================================
 // Group 24 Arduino code
+// Haydn Boul
+// Nathan van Slooten
+// Arabella Cryer
 // =================================
 
-char receivedChar;
-boolean newData, receivedNums = false;
-const byte ledPin = 13;
-const byte interruptPin = 2;
-volatile byte state = LOW;
+#include "robot.h"
 
+robotState Robot;
+char receivedChar;
+boolean newData = false;
+
+// ============= SETUP =============
 void setup() {
   Serial.begin(9600);
   Serial.println("<Arduino is ready>");
-  pinMode(ledPin, OUTPUT);
-  pinMode(interruptPin, INPUT_PULLUP);
-  attachInterrupt(digitalPinToInterrupt(interruptPin), blink, CHANGE);
+  pinMode(functionLED, OUTPUT);
+  
+  Robot = WAITING;
+    
 }
+// =================================
 
 void loop() {
-    recvOneChar();
-    digitalWrite(ledPin, state);
+  switch (Robot){
+    case WAITING:
+    Serial.println("State: Waiting");
+      runWaitingLED();
+      recvOneChar();
+      showNewData();
+      break;
+
+    case EXECUTING:
+      Serial.println("State: Executing");
+      
+      break;
+  }
+
+
+  delay(1000);
 }
 
-void recvOneChar() {
-  Serial.print("Input Direction:\nForward (F), Reverse (R), Turn (T)")
-    if (Serial.available() > 0) {
-        receivedChar = Serial.read();
-        newData = true;
-        inputNums();
-    }
-}
 
-void inputNums() {
-  if (newData == true) {
-    if (receivedChar == "T") {
-      Serial.print("Input Angle... ");
-      distanceChar = Serial.read();
-      receivedNums = true;
-    } else {
-      Serial.print("Input Distance... ");
-      distanceChar = Serial.read();
-      receivedNums = true;
-    }
-    moveMotor();
+void runWaitingLED(){
+// Runs the status LED
+  if (waitingLEDCounter != 1){
+    digitalWrite(functionLED, HIGH);
+    waitingLEDCounter++;
+  } else{
+    waitingLEDCounter = 0;
+    digitalWrite(functionLED, LOW);
   }
 }
 
-void moveMotor() {
-  
+
+void recvOneChar() {
+    if (Serial.available() > 0) {
+        receivedChar = Serial.read();
+        newData = true;
+        Robot = EXECUTING;
+    }
+}
+
+void showNewData() {
+    if (newData == true) {
+        Serial.print("This just in ... ");
+        Serial.println(receivedChar);
+        newData = false;
+    }
 }
