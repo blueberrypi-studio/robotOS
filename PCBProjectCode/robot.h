@@ -9,7 +9,17 @@ typedef enum {
 // ======= init vars ===============
 
 int waitingLEDCounter = 0;
-int movementLEDCounter = 0;
+
+int motorSpeed = 100;
+
+int movement = 0;
+unsigned int rpm;
+volatile byte pulses;
+unsigned long time_old;
+unsigned int pulses_per_turn= 20; // Depends on the number of spokes on the encoder wheel
+
+long duration; // variable for the duration of sound wave travel
+int distance; // variable for the distance measurement
 
 // =================================
 
@@ -18,8 +28,8 @@ const byte functionLED = A0;
 const byte leftMovementLED = 4;
 const byte rightMovementLED = 3;
 
-const byte encoderA = 2;
-const byte encoderB = A1;
+const byte encoderLeft = 2;
+const byte encoderRight = A1;
 
 const byte sensorTrig = A2;
 const byte sensorEcho = A3;
