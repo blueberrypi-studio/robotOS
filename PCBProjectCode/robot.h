@@ -8,6 +8,18 @@ typedef enum {
 
 // ======= init vars ===============
 
+typedef enum {
+  STRAIGHT,
+  TURNING
+} movementType;
+
+typedef enum {
+  FORWARDS,
+  REVERSE,
+  CLOCKWISE,
+  ANTICLOCKWISE
+} newDirection;
+
 int waitingLEDCounter = 0;
 
 int motorSpeed = 100;

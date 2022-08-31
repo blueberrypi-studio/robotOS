@@ -8,8 +8,12 @@
 #include "robot.h"
 
 robotState Robot;
-char receivedChar;
-boolean newData = false;
+char receivedChar, directionChar, distanceChar;
+boolean newData, inputMovement = false;
+int counter = 0;
+unsigned int robotDistance;
+movementType robotMovement;
+newDirection robotDirection;
 
 // ============= SETUP =============
 void setup() {
@@ -46,7 +50,8 @@ void loop() {
 //    Serial.println("State: Waiting");
       runWaitingLED();
       recvOneChar();
-      showNewData();
+      inputDirection();
+      inputDistance();
       break;
 
     case EXECUTING:
@@ -126,17 +131,63 @@ void runWaitingLED(){
 
 
 void recvOneChar() {
-    if (Serial.available() > 0) {
+    //if (Serial.available() > 0) {
+      if ((counter % 3) == 0 and inputMovement == false) {
+      Serial.println("Input a movement:\nStraight (S)\nTurn (T)\n");
         receivedChar = Serial.read();
+        if (receivedChar = 'S') {
+          robotMovement = STRAIGHT;
+          counter +=1;
+        } else if (receivedChar = 'T') {
+          robotMovement = TURNING;
+          counter +=1;
+        }
         newData = true;
-        Robot = EXECUTING;
+        
+    }
+    //}
+}
+
+void inputDirection() {
+    if (newData == true) {
+      if ((counter % 3) == 1) {
+        counter += 1;
+      if (robotMovement == TURNING) {
+        Serial.println("Input direction to turn robot:\nAnticlockwise (A)\nClockwise(C)");
+        directionChar = Serial.read();
+        if (directionChar == 'A') {
+          robotDirection = ANTICLOCKWISE;
+        } else {
+          robotDirection = CLOCKWISE;
+        }
+      } else if (robotMovement = STRAIGHT) {
+        Serial.println("Input direction to turn robot:\nForwards (F)\nReverse (R)");
+        directionChar = Serial.read();
+        if (directionChar == 'F') {
+          robotDirection = FORWARDS; 
+        } else {
+          robotDirection = REVERSE;
+        }
+      }
+    }
+    inputDistance();
     }
 }
 
-void showNewData() {
-    if (newData == true) {
-        Serial.print("This just in ... ");
-        Serial.println(receivedChar);
-        newData = false;
-    }
+void inputDistance() {
+  if ((counter % 3) == 2) {
+      counter += 1;
+  if (robotMovement = TURNING) {
+    Serial.println("Input the amount you would like to turn the robot in degrees");
+    distanceChar = Serial.read();
+    robotDistance = (int) distanceChar;
+    Robot = EXECUTING;
+  } else {
+    Serial.println("Input the amount you would like to move the robot in centimetres");
+    distanceChar = Serial.read();
+    robotDistance = (int) distanceChar;
+    Robot = EXECUTING;
+  }
+  }
+  
 }
