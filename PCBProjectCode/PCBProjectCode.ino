@@ -20,6 +20,8 @@ void setup() {
   Serial.begin(9600);
   Serial.println("<Arduino is ready>");
   pinMode(functionLED, OUTPUT);
+  pinMode(leftMovementLED, OUTPUT);
+  pinMode(rightMovementLED, OUTPUT);
   pinMode(motorLeftA,OUTPUT); // Motor Setup
   pinMode(motorLeftB,OUTPUT); // Motor Setup
 
@@ -30,6 +32,7 @@ void setup() {
   pinMode(sensorEcho, INPUT);
   
   Robot = WAITING;
+  robotDirection = FORWARDS;
 
   rpm=0;
   pulses=0;
@@ -45,22 +48,83 @@ void setup() {
 // =================================
 
 void loop() {
+
+  currentMillis = millis(); // For LED flashing
+
   switch (Robot){
     case WAITING:
 //    Serial.println("State: Waiting");
       runWaitingLED();
-      recvOneChar();
-      inputDirection();
-      inputDistance();
+      runLeftMovementLED();
+      runRightMovementLED();
+      // recvOneChar();
+      // inputDirection();
+      // inputDistance();
       break;
 
     case EXECUTING:
 //      Serial.println("State: Executing");
-//      runMotors(20, 50);
-      checkDistance();
+     runMotors(20, 50);
+      // checkDistance();
       break;
   }
+  // delay(1);
+}
 
+void flashFunctionLED() {
+  if (currentMillis - functionLEDPreviousMillis >= LEDFlashInterval) {
+    // save the last time you blinked the LED
+    functionLEDPreviousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+    if (functionLEDState == LOW) {
+      functionLEDState = HIGH;
+    } else {
+      functionLEDState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(functionLED, functionLEDState);
+  }
+}
+
+void flashLeftMovementLED() {
+  if (currentMillis - leftMotorPreviousMillis >= LEDFlashInterval) {
+    // save the last time you blinked the LED
+    leftMotorPreviousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+    if (leftMotorLEDState == LOW) {
+      leftMotorLEDState = HIGH;
+    } else {
+      leftMotorLEDState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(leftMovementLED, leftMotorLEDState);
+  }
+}
+
+
+void flashRightMovementLED() {
+  if (currentMillis - rightMotorPreviousMillis >= LEDFlashInterval) {
+    // save the last time you blinked the LED
+    rightMotorPreviousMillis = currentMillis;
+
+    // if the LED is off turn it on and vice-versa:
+    if (rightMotorLEDState == LOW) {
+      rightMotorLEDState = HIGH;
+    } else {
+      rightMotorLEDState = LOW;
+    }
+
+    // set the LED with the ledState of the variable:
+    digitalWrite(rightMovementLED, rightMotorLEDState);
+  }
+}
+
+void solidLED(byte pin) {
+  digitalWrite(pin, HIGH);
 }
 
 void count() // Counting the number of pulses for calculation of rpm
@@ -119,13 +183,41 @@ void checkDistance(){
 }
 
 void runWaitingLED(){
-// Runs the status LED
-  if (waitingLEDCounter != 1000){
-    digitalWrite(functionLED, HIGH);
-    waitingLEDCounter++;
-  } else{
-    waitingLEDCounter = 0;
-    digitalWrite(functionLED, LOW);
+  switch (Robot){
+    case WAITING:
+      flashFunctionLED();
+      break;
+    case EXECUTING:
+      solidLED(functionLED);
+      break;
+  }
+}
+
+void runLeftMovementLED(){
+  switch (robotDirection){
+    case STATIONARY:
+      digitalWrite(leftMovementLED, LOW);
+      break;
+    case FORWARDS:
+      solidLED(leftMovementLED);
+      break;
+    case REVERSE:
+      flashLeftMovementLED();
+      break;
+  }
+}
+
+void runRightMovementLED(){
+  switch (robotDirection){
+    case STATIONARY:
+      digitalWrite(rightMovementLED, LOW);
+      break;
+    case FORWARDS:
+      solidLED(rightMovementLED);
+      break;
+    case REVERSE:
+      flashRightMovementLED();
+      break;
   }
 }
 
@@ -161,7 +253,7 @@ void inputDirection() {
           robotDirection = CLOCKWISE;
         }
       } else if (robotMovement = STRAIGHT) {
-        Serial.println("Input direction to turn robot:\nForwards (F)\nReverse (R)");
+        Serial.println("Input direction to drive robot:\nForwards (F)\nReverse (R)");
         directionChar = Serial.read();
         if (directionChar == 'F') {
           robotDirection = FORWARDS; 

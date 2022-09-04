@@ -14,6 +14,7 @@ typedef enum {
 } movementType;
 
 typedef enum {
+  STATIONARY,
   FORWARDS,
   REVERSE,
   CLOCKWISE,
@@ -23,6 +24,28 @@ typedef enum {
 int waitingLEDCounter = 0;
 
 int motorSpeed = 100;
+
+const long LEDFlashInterval = 500;  // interval at which to blink (milliseconds)
+unsigned long currentMillis;
+
+// =========== init function LED ============
+int functionLEDState = LOW; 
+unsigned long functionLEDPreviousMillis = 0;
+
+// ==========================================
+
+// =========== init leftMotor LED ===========
+int leftMotorLEDState = LOW; 
+unsigned long leftMotorPreviousMillis = 0;
+
+// ==========================================
+
+// =========== init rightMotor LED ===========
+int rightMotorLEDState = LOW; 
+unsigned long rightMotorPreviousMillis = 0;
+
+// ==========================================
+
 
 int movement = 0;
 unsigned int rpm;
