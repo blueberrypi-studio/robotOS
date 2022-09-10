@@ -11,6 +11,10 @@ robotState Robot;
 char receivedChar, directionChar, distanceChar;
 boolean newData, inputMovement = false;
 int counter = 0;
+char inData[20]; // Allocate some space for the string
+int inChar; // Where to store the character read
+byte charIndex = 0; // Index into array; where to store the character
+boolean okPrint;
 unsigned int robotDistance;
 movementType robotMovement;
 newDirection robotDirection;
@@ -47,11 +51,20 @@ void loop() {
 
   switch (Robot) {
     case WAITING:
-      // Serial.println("State: Waiting");
+      //Serial.println("State: Waiting");
       runWaitingLED();
-      // recvOneChar();
-      // inputDirection();
-      // inputDistance();
+      while(Serial.available() > 0) { // Don't read unless
+                                                 // there you know there is data 
+        if(charIndex < 19) // One less than the size of the array
+        {
+            inChar = Serial.read(); // Read a character
+            inData[charIndex] = char(inChar); // Store it
+            charIndex++; // Increment where to write next
+            inData[charIndex] = '\0'; // Null terminate the string
+        }
+        okPrint == true;
+      }
+      Serial.println(String(inData));
       break;
 
     case EXECUTING:
@@ -145,66 +158,6 @@ void checkDistance() {
   Serial.print("Distance: ");
   Serial.print(distance);
   Serial.println(" cm");
-}
-
-void recvOneChar() {
-  //if (Serial.available() > 0) {
-  if ((counter % 3) == 0 and inputMovement == false) {
-    Serial.println("Input a movement:\nStraight (S)\nTurn (T)\n");
-    receivedChar = Serial.read();
-    if (receivedChar = 'S') {
-      robotMovement = STRAIGHT;
-      counter += 1;
-    } else if (receivedChar = 'T') {
-      robotMovement = TURNING;
-      counter += 1;
-    }
-    newData = true;
-  }
-  //}
-}
-
-void inputDirection() {
-  if (newData == true) {
-    if ((counter % 3) == 1) {
-      counter += 1;
-      if (robotMovement == TURNING) {
-        Serial.println("Input direction to turn robot:\nAnticlockwise (A)\nClockwise(C)");
-        directionChar = Serial.read();
-        if (directionChar == 'A') {
-          robotDirection = ANTICLOCKWISE;
-        } else {
-          robotDirection = CLOCKWISE;
-        }
-      } else if (robotMovement = STRAIGHT) {
-        Serial.println("Input direction to drive robot:\nForwards (F)\nReverse (R)");
-        directionChar = Serial.read();
-        if (directionChar == 'F') {
-          robotDirection = FORWARDS;
-        } else {
-          robotDirection = REVERSE;
-        }
-      }
-    }
-    inputDistance();
-  }
-}
-
-void inputDistance() {
-  if ((counter % 3) == 2) {
-    counter += 1;
-    if (robotMovement = TURNING) {
-      Serial.println("Input the amount you would like to turn the robot in degrees");
-      distanceChar = Serial.read();
-      robotDistance = (int)distanceChar;
-      Robot = EXECUTING;
-    } else {
-      Serial.println("Input the amount you would like to move the robot in centimetres");
-      distanceChar = Serial.read();
-      robotDistance = (int)distanceChar;
-      Robot = EXECUTING;
-    }
-  }
 }
 
 void flashFunctionLED() {
@@ -301,6 +254,3 @@ void runRightMovementLED() {
       break;
   }
 }
-
-
-
