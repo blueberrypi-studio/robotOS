@@ -36,7 +36,7 @@ void setup() {
   pinMode(encoderLeft, INPUT);   // Setting encoder pin as Input
   pinMode(encoderRight, INPUT);  // Setting encoder pin as Input
 
-  Robot = EXECUTING;
+  Robot = WAITING;
   robotDirection = STATIONARY;
 }
 // =================================
@@ -301,3 +301,6 @@ void runRightMovementLED() {
       break;
   }
 }
+
+
+
