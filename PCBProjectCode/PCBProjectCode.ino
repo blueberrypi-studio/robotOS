@@ -8,14 +8,6 @@
 #include "robot.h"
 
 robotState Robot;
-char receivedChar, directionChar, distanceChar;
-boolean newData, inputMovement = false;
-int counter = 0;
-char inData[20];     // Allocate some space for the string
-int inChar;          // Where to store the character read
-byte charIndex = 0;  // Index into array; where to store the character
-boolean okPrint;
-unsigned int robotDistance;
 
 movementType robotMovement;
 newDirection robotDirection;

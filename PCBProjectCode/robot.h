@@ -1,5 +1,3 @@
-#include <Arduino.h>
-
 // ======== Robot States ===========
 typedef enum {
   WAITING,
@@ -11,7 +9,7 @@ typedef enum {
 // ======= init vars ===============
 
 typedef enum {
-  STRAIGHT,
+  NOT_TURNING,
   TURNING
 } movementType;
 
@@ -103,5 +101,6 @@ int turn;
 #define motorLeftB 9   //PWM
 
 #define motorRightA 6  //PWM
-#define motorRightB 5  //PWM \
-                       // =================================
+#define motorRightB 5  //PWM
+
+// =================================
