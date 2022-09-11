@@ -1,3 +1,5 @@
+#include <Arduino.h>
+
 // ======== Robot States ===========
 typedef enum {
   WAITING,
