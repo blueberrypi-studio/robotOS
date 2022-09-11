@@ -9,7 +9,7 @@ typedef enum {
 // ======= init vars ===============
 
 typedef enum {
-  STRAIGHT,
+  NOT_TURNING,
   TURNING
 } movementType;
 

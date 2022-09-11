@@ -8,12 +8,14 @@
 #include "robot.h"
 
 robotState Robot;
-char receivedChar, directionChar, distanceChar;
+char receivedChar, directionChar, distanceChar, robotDistanceString[5];
 boolean newData, inputMovement = false;
-int counter = 0;
 char inData[20]; // Allocate some space for the string
+char c;
 int inChar; // Where to store the character read
 byte charIndex = 0; // Index into array; where to store the character
+byte stringRead = 0; 
+byte counter = 0;
 boolean okPrint;
 unsigned int robotDistance;
 movementType robotMovement;
@@ -64,7 +66,12 @@ void loop() {
         }
         okPrint == true;
       }
-      Serial.println(String(inData));
+      
+      //Serial.println(String(inData));
+      readInput();
+      if (robotDirection == FORWARDS) {
+        Serial.println("true");
+      }
       break;
 
     case EXECUTING:
@@ -253,4 +260,31 @@ void runRightMovementLED() {
       flashRightMovementLED();
       break;
   }
+}
+
+void readInput() {
+  for (c = inData[stringRead]; stringRead<sizeof(inData); stringRead++) {
+    Serial.print(c);
+    if (c == 'F') {
+      Serial.println("true");
+      robotDirection = FORWARDS;
+    } else if (c == 'R') {
+      robotDirection = REVERSE;
+    } else if (c == 'S') {
+      robotDirection = STATIONARY;
+    } else if (c == 'A') {
+      robotDirection = ANTICLOCKWISE;
+    } else if (c == 'C') {
+      robotDirection = CLOCKWISE;
+    } else if (c == 'T') {
+      robotMovement = TURNING;
+    } else if (c == 'N') {
+      robotMovement = NOT_TURNING;
+    } else if (isDigit(c)) {
+      robotDistanceString[counter] = c;
+      counter++;
+    }
+    stringRead++;
+  }
+  robotDistance = atoi(robotDistanceString);
 }
