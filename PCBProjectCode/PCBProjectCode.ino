@@ -11,13 +11,17 @@ robotState Robot;
 char receivedChar, directionChar, distanceChar;
 boolean newData, inputMovement = false;
 int counter = 0;
-char inData[20]; // Allocate some space for the string
-int inChar; // Where to store the character read
-byte charIndex = 0; // Index into array; where to store the character
+char inData[20];     // Allocate some space for the string
+int inChar;          // Where to store the character read
+byte charIndex = 0;  // Index into array; where to store the character
 boolean okPrint;
 unsigned int robotDistance;
+
 movementType robotMovement;
 newDirection robotDirection;
+
+leftMotorDirection leftDirection;
+rightMotorDirection rightDirection;
 
 // ============= SETUP =============
 void setup() {
@@ -40,8 +44,10 @@ void setup() {
   pinMode(encoderLeft, INPUT);   // Setting encoder pin as Input
   pinMode(encoderRight, INPUT);  // Setting encoder pin as Input
 
-  Robot = WAITING;
-  robotDirection = STATIONARY;
+  Robot = WAITING;                   // Set initial Robot state
+  robotDirection = FORWARDS;         // Set initial Robot movement state
+  leftDirection = leftSTATIONARY;    // Set initial left motor state
+  rightDirection = rightSTATIONARY;  // Set initial right motor state
 }
 // =================================
 
@@ -53,49 +59,89 @@ void loop() {
     case WAITING:
       //Serial.println("State: Waiting");
       runWaitingLED();
-      while(Serial.available() > 0) { // Don't read unless
-                                                 // there you know there is data 
-        if(charIndex < 19) // One less than the size of the array
-        {
-            inChar = Serial.read(); // Read a character
-            inData[charIndex] = char(inChar); // Store it
-            charIndex++; // Increment where to write next
-            inData[charIndex] = '\0'; // Null terminate the string
-        }
-        okPrint == true;
+      Serial.println("Would you like to move (M) or turn (T)? ");
+
+      while (Serial.available() == 0) {
       }
-      Serial.println(String(inData));
-      break;
 
-    case EXECUTING:
-      //  Serial.println("State: Executing");
-      //  checkDistance();
-      runWaitingLED();
-      runLeftMovementLED();
-      runRightMovementLED();
+      String option = Serial.readString();
+      option.trim();
+
+      if (option.equals("T")) {
+        Serial.println("Enter degrees (negative for left, normal for right) ");
+        while (Serial.available() == 0) {}
+        turn = Serial.parseInt();
+
+      } else if (option.equals("M")) {
+        Serial.println("Enter distance (negative for left, normal for right) ");
+        while (Serial.available() == 0) {}
+        distanceCM = Serial.parseInt();
+        if (distanceCM > 0) {
+          robotDirection = FORWARDS;
+          moveRobot(distanceCM);
+          
+        } else if (distanceCM < 0) {
+          robotDirection = REVERSE;
+          moveRobot(distanceCM);
+          
+        } else {
+          Serial.println("Invalid Input");
+        }
+  }  else {
+    Serial.println("Invalid Inpu lol");
+  }
+
+  break;
+
+  case EXECUTING:
+    //  Serial.println("State: Executing");
+    //  checkDistance();
+    runWaitingLED();
+    runLeftMovementLED();
+    runRightMovementLED();
+    // moveRobot(10);
+
+
+
+    break;
+}
+}
+
+int getNumberOfSteps(int distance) {
+  return (distance / wheelCircumference) * 20;  // distance to encoder steps converter
+}
+
+void moveRobot(int distance) {
+  switch (robotDirection) {
+    case STATIONARY:
       runLeftMotor(0);
-      runRightMotor(20);
-
+      runRightMotor(0);
       break;
+    case FORWARDS:
+      runLeftMotor(getNumberOfSteps(distance));
+      runRightMotor(getNumberOfSteps(distance));
   }
 }
 
 void runLeftMotor(int leftDistance) {
-  if (leftDistance == 0){
+  if (leftDistance == 0) {
     analogWrite(motorLeftA, 0);  // Motor On, swap for other direction
     analogWrite(motorLeftB, 0);  // Motor On, swap for other direction
+    leftDirection = leftSTATIONARY;
+
     return;
   }
-
 
   if (encoderLeftCount <= abs(leftDistance)) {
     if (leftDistance < 0) {
       analogWrite(motorLeftA, 0);           // Motor On, swap for other direction
       analogWrite(motorLeftB, motorSpeed);  // Motor On, swap for other direction
+      leftDirection = leftREVERSE;
     }
     if (leftDistance > 0) {
       analogWrite(motorLeftB, 0);           // Motor On, swap for other direction
       analogWrite(motorLeftA, motorSpeed);  // Motor On, swap for other direction
+      leftDirection = leftFORWARDS;
     }
     encoderLeftState = digitalRead(encoderLeft);
     if ((encoderLeftState == HIGH) && (encoderLeftStateOld == LOW)) {
@@ -106,26 +152,32 @@ void runLeftMotor(int leftDistance) {
   } else {
     analogWrite(motorLeftA, 0);  // Motor On, swap for other direction
     analogWrite(motorLeftB, 0);  // Motor On, swap for other direction
-    delay(500);
+    Robot = WAITING;
+    leftDirection = leftSTATIONARY;
     encoderLeftCount = 1;
+    return;
   }
 }
 
 
 void runRightMotor(int rightDistance) {
-    if (rightDistance == 0){
+  if (rightDistance == 0) {
+
     analogWrite(motorRightA, 0);  // Motor On, swap for other direction
     analogWrite(motorRightB, 0);  // Motor On, swap for other direction
+    rightDirection = rightSTATIONARY;
     return;
   }
   if (encoderRightCount <= abs(rightDistance)) {
     if (rightDistance < 0) {
-      analogWrite(motorRightA, 0);           // Motor On, swap for other direction
+      analogWrite(motorRightA, 0);           // Set Right motor A to zero
       analogWrite(motorRightB, motorSpeed);  // Motor On, swap for other direction
+      rightDirection = rightREVERSE;
     }
     if (rightDistance > 0) {
       analogWrite(motorRightB, 0);           // Motor On, swap for other direction
       analogWrite(motorRightA, motorSpeed);  // Motor On, swap for other direction
+      rightDirection = rightFORWARDS;
     }
     encoderRightState = digitalRead(encoderRight);
     if ((encoderRightState == HIGH) && (encoderRightStateOld == LOW)) {
@@ -136,11 +188,14 @@ void runRightMotor(int rightDistance) {
   } else {
     analogWrite(motorRightA, 0);  // Motor On, swap for other direction
     analogWrite(motorRightB, 0);  // Motor On, swap for other direction
-    delay(500);
-    // Robot = WAITING;
+    Robot = WAITING;
+    rightDirection = rightSTATIONARY;
     encoderRightCount = 1;
+    return;
   }
 }
+
+// ================== Distance Sensor Functions ==================
 
 void checkDistance() {
   // Clears the trigPin condition
@@ -159,6 +214,10 @@ void checkDistance() {
   Serial.print(distance);
   Serial.println(" cm");
 }
+
+// ===========================================================
+
+// ================== LED Control Functions ==================
 
 void flashFunctionLED() {
   if (currentMillis - functionLEDPreviousMillis >= LEDFlashInterval) {
@@ -219,38 +278,40 @@ void solidLED(byte pin) {
 void runWaitingLED() {
   switch (Robot) {
     case WAITING:
-      flashFunctionLED();
+      solidLED(functionLED);
       break;
     case EXECUTING:
-      solidLED(functionLED);
+      flashFunctionLED();
       break;
   }
 }
 
 void runLeftMovementLED() {
-  switch (robotDirection) {
-    case STATIONARY:
+  switch (leftDirection) {
+    case leftSTATIONARY:
       digitalWrite(leftMovementLED, LOW);
       break;
-    case FORWARDS:
+    case leftFORWARDS:
       solidLED(leftMovementLED);
       break;
-    case REVERSE:
+    case leftREVERSE:
       flashLeftMovementLED();
       break;
   }
 }
 
 void runRightMovementLED() {
-  switch (robotDirection) {
-    case STATIONARY:
+  switch (rightDirection) {
+    case rightSTATIONARY:
       digitalWrite(rightMovementLED, LOW);
       break;
-    case FORWARDS:
+    case rightFORWARDS:
       solidLED(rightMovementLED);
       break;
-    case REVERSE:
+    case rightREVERSE:
       flashRightMovementLED();
       break;
   }
 }
+
+// =====================================================

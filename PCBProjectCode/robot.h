@@ -23,44 +23,68 @@ typedef enum {
   ANTICLOCKWISE
 } newDirection;
 
-int motorSpeed = 100;
+typedef enum {
+  leftSTATIONARY,
+  leftFORWARDS,
+  leftREVERSE
+} leftMotorDirection;
+
+typedef enum {
+  rightSTATIONARY,
+  rightFORWARDS,
+  rightREVERSE
+} rightMotorDirection;
+
+const int motorSpeed = 100;
+const float wheelCircumference = 21.3;
 
 const long LEDFlashInterval = 500;  // interval at which to blink (milliseconds)
 unsigned long currentMillis;
 
 // =========== init function LED ============
+
 int functionLEDState = LOW;
 unsigned long functionLEDPreviousMillis = 0;
 
 // ==========================================
 
 // =========== init leftMotor LED ===========
+
 int leftMotorLEDState = LOW;
 unsigned long leftMotorPreviousMillis = 0;
 
 // ==========================================
 
 // =========== init rightMotor LED ===========
+
 int rightMotorLEDState = LOW;
 unsigned long rightMotorPreviousMillis = 0;
+
 // ==========================================
 
 // ========== encoderLeft init =============
+
 int encoderLeftCount = 1;
 int encoderLeftState;
 int encoderLeftStateOld = LOW;
+
 // ==========================================
 
 // ========== encoderRight init =============
+
 int encoderRightCount = 1;
 int encoderRightState;
 int encoderRightStateOld = LOW;
+
 // ==========================================
 
 int movement = 0;
 
 long duration;  // variable for the duration of sound wave travel
 int distance;   // variable for the distance measurement
+
+int distanceCM;
+int turn;
 
 // =================================
 
@@ -79,5 +103,5 @@ int distance;   // variable for the distance measurement
 #define motorLeftB 9   //PWM
 
 #define motorRightA 6  //PWM
-#define motorRightB 5  //PWM
+#define motorRightB 5  //PWM \
                        // =================================
