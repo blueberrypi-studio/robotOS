@@ -1,6 +1,6 @@
 // ======== Robot States ===========
 typedef enum {
-  WAITING,
+  WAITING = 0,
   EXECUTING,
   UNTETHERED
 } robotState;
@@ -33,7 +33,9 @@ typedef enum {
   rightREVERSE
 } rightMotorDirection;
 
-const int motorSpeed = 100;
+const int leftMotorSpeed = 125;
+const int rightMotorSpeed = 100;
+
 const float wheelCircumference = 21.3;
 
 const long LEDFlashInterval = 500;  // interval at which to blink (milliseconds)
@@ -87,6 +89,7 @@ int turn;
 // =================================
 
 // ======= init pins ===============
+
 #define functionLED A0      // Status LED
 #define leftMovementLED 4   // Left LED
 #define rightMovementLED 3  // Right LED
