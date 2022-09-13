@@ -63,6 +63,15 @@ void loop() {
     turn = 0;
     // Serial.println("State: Waiting");
     runWaitingLED();
+
+    Serial.println("How fast would you like to go? 80 --> 200");
+
+    while (Serial.available() == 0) {}  // Delay entire program until user input
+
+    speed = Serial.parseInt();
+    rightMotorSpeed = speed;
+    leftMotorSpeed = speed*1.25;
+
     Serial.println("Would you like to move (M) or turn (T)? ");
 
     while (Serial.available() == 0) {}  // Delay entire program until user input

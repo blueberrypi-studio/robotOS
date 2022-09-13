@@ -33,8 +33,9 @@ typedef enum {
   rightREVERSE
 } rightMotorDirection;
 
-const int leftMotorSpeed = 125;
-const int rightMotorSpeed = 100;
+int speed = 100;
+int leftMotorSpeed = 125;
+int rightMotorSpeed = 100;
 
 const float wheelCircumference = 21.3;
 
