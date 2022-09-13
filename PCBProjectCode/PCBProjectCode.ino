@@ -59,6 +59,12 @@ void loop() {
     encoderLeftCount = 1;
     encoderRightCount = 1;
 
+  analogWrite(motorLeftB, 0);   // Motor On, swap for other direction
+  analogWrite(motorLeftA, 0);   // Motor On, swap for other direction
+  analogWrite(motorRightB, 0);  // Motor On, swap for other direction
+  analogWrite(motorRightA, 0);  // Motor On, swap for other direction
+
+
     distanceCM = 0;
     turn = 0;
     // Serial.println("State: Waiting");
@@ -72,7 +78,7 @@ void loop() {
     rightMotorSpeed = speed;
     leftMotorSpeed = speed*1.25;
 
-    Serial.println("Would you like to move (M) or turn (T)? ");
+    Serial.println("Would you like to move (M), turn (T), or stop at distance (D)? ");
 
     while (Serial.available() == 0) {}  // Delay entire program until user input
 
@@ -89,6 +95,12 @@ void loop() {
       Serial.println("Enter distance (negative for left, normal for right) ");
       while (Serial.available() == 0) {}  // Delay entire program until user input
       distanceCM = Serial.parseInt();
+      Robot = EXECUTING;
+
+    } else if (option.equals("D")) {
+      Serial.println("Enter distance from object wanted ");
+      while (Serial.available() == 0) {}  // Delay entire program until user input
+      objectDistance = Serial.parseInt();
       Robot = EXECUTING;
     }
   }
@@ -110,6 +122,21 @@ void loop() {
     } else if (turn < 0) {
       robotDirection = ANTICLOCKWISE;
       moveRobot(turn);
+    }
+
+    if (objectDistance > 0) {
+      checkDistance();
+      if (distance > objectDistance) {
+        analogWrite(motorLeftB, 0);               // Motor On, swap for other direction
+        analogWrite(motorLeftA, leftMotorSpeed);  // Motor On, swap for other direction
+        analogWrite(motorRightB, 0);               // Motor On, swap for other direction
+        analogWrite(motorRightA, rightMotorSpeed);  // Motor On, swap for other direction
+      } else {
+        Robot = WAITING;
+        robotDirection = STATIONARY;
+      }
+
+
     }
 
     if ((leftDirection == leftSTATIONARY) && (rightDirection == rightSTATIONARY)) {
@@ -283,9 +310,9 @@ void checkDistance() {
   // Calculating the distance
   distance = duration * 0.034 / 2;  // Speed of sound wave divided by 2 (go and back)
   // Displays the distance on the Serial Monitor
-  Serial.print("Distance: ");
-  Serial.print(distance);
-  Serial.println(" cm");
+  //Serial.print("Distance: ");
+  //Serial.print(distance);
+  //Serial.println(" cm");
 }
 
 // ===========================================================

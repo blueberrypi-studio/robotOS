@@ -85,6 +85,7 @@ long duration;  // variable for the duration of sound wave travel
 int distance;   // variable for the distance measurement
 
 int distanceCM;
+int objectDistance = 0;
 int turn;
 
 // =================================
