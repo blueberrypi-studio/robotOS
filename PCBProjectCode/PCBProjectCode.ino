@@ -107,7 +107,12 @@ void loop() {
 
   if (Robot == EXECUTING) {
     // Serial.println("State: Executing");
-
+    checkDistance();
+    if (distance < stuck) {
+      Robot = WAITING;
+      robotDirection = STATIONARY;
+    }
+    
     if (distanceCM > 0) {
       robotDirection = FORWARDS;
       moveRobot(distanceCM);
@@ -125,7 +130,6 @@ void loop() {
     }
 
     if (objectDistance > 0) {
-      checkDistance();
       if (distance > objectDistance) {
         analogWrite(motorLeftB, 0);               // Motor On, swap for other direction
         analogWrite(motorLeftA, leftMotorSpeed);  // Motor On, swap for other direction
