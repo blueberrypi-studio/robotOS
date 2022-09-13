@@ -136,13 +136,13 @@ void moveRobot(int distance) {
   }
 
   if (robotDirection == CLOCKWISE) {
-    runLeftMotor(10);
-    runRightMotor(-10);
+    runLeftMotor(distance/9);
+    runRightMotor(-distance/9);
   }
 
   if (robotDirection == ANTICLOCKWISE) {
-    runLeftMotor(-10);
-    runRightMotor(10);
+    runLeftMotor(-distance/9);
+    runRightMotor(distance/9);
   }
 
 }
