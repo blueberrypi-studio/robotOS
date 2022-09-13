@@ -58,6 +58,9 @@ void loop() {
   if (Robot == WAITING) {
     encoderLeftCount = 1;
     encoderRightCount = 1;
+
+    distanceCM = 0;
+    turn = 0;
     // Serial.println("State: Waiting");
     runWaitingLED();
     Serial.println("Would you like to move (M) or turn (T)? ");
@@ -133,13 +136,13 @@ void moveRobot(int distance) {
   }
 
   if (robotDirection == CLOCKWISE) {
-    runLeftMotor(1);
-    runRightMotor(-1);
+    runLeftMotor(10);
+    runRightMotor(-10);
   }
 
   if (robotDirection == ANTICLOCKWISE) {
-    runLeftMotor(-1);
-    runRightMotor(1);
+    runLeftMotor(-10);
+    runRightMotor(10);
   }
 
 }
