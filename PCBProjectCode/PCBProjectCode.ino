@@ -40,7 +40,7 @@ void setup() {
   pinMode(encoderRight, INPUT);  // Setting encoder pin as Input
 
   Robot = WAITING;                   // Set initial Robot state
-  robotDirection = FORWARDS;         // Set initial Robot movement state
+  robotDirection = STATIONARY;       // Set initial Robot movement state
   leftDirection = leftSTATIONARY;    // Set initial left motor state
   rightDirection = rightSTATIONARY;  // Set initial right motor state
 
@@ -48,6 +48,14 @@ void setup() {
   analogWrite(motorLeftA, 0);   // Motor On, swap for other direction
   analogWrite(motorRightB, 0);  // Motor On, swap for other direction
   analogWrite(motorRightA, 0);  // Motor On, swap for other direction
+
+  Serial.println("How fast would you like to go? 80 --> 200");
+
+  while (Serial.available() == 0) {}  // Delay entire program until user input
+
+  speed = Serial.parseInt();
+  rightMotorSpeed = speed;
+  leftMotorSpeed = speed * 1.15;
 }
 // =================================
 
@@ -58,27 +66,17 @@ void loop() {
   if (Robot == WAITING) {
     encoderLeftCount = 1;
     encoderRightCount = 1;
-
-  analogWrite(motorLeftB, 0);   // Motor On, swap for other direction
-  analogWrite(motorLeftA, 0);   // Motor On, swap for other direction
-  analogWrite(motorRightB, 0);  // Motor On, swap for other direction
-  analogWrite(motorRightA, 0);  // Motor On, swap for other direction
+    analogWrite(motorLeftB, 0);   // Motor On, swap for other direction
+    analogWrite(motorLeftA, 0);   // Motor On, swap for other direction
+    analogWrite(motorRightB, 0);  // Motor On, swap for other direction
+    analogWrite(motorRightA, 0);  // Motor On, swap for other direction
 
 
     distanceCM = 0;
     turn = 0;
     // Serial.println("State: Waiting");
     runWaitingLED();
-
-    Serial.println("How fast would you like to go? 80 --> 200");
-
-    while (Serial.available() == 0) {}  // Delay entire program until user input
-
-    speed = Serial.parseInt();
-    rightMotorSpeed = speed;
-    leftMotorSpeed = speed*1.25;
-
-    Serial.println("Would you like to move (M), turn (T), or stop at distance (D)? ");
+    Serial.println("Would you like to move (M) or turn (T)? ");
 
     while (Serial.available() == 0) {}  // Delay entire program until user input
 
@@ -92,28 +90,33 @@ void loop() {
       Robot = EXECUTING;
 
     } else if (option.equals("M")) {
-      Serial.println("Enter distance (negative for left, normal for right) ");
+      Serial.println("Enter distance (negative for reverse, normal for forwards) ");
       while (Serial.available() == 0) {}  // Delay entire program until user input
       distanceCM = Serial.parseInt();
       Robot = EXECUTING;
-
-    } else if (option.equals("D")) {
-      Serial.println("Enter distance from object wanted ");
-      while (Serial.available() == 0) {}  // Delay entire program until user input
-      objectDistance = Serial.parseInt();
-      Robot = EXECUTING;
-    }
+    }  // else if (option.equals("D")) {
+    //   Serial.println("Enter distance from object wanted ");
+    //   while (Serial.available() == 0) {}  // Delay entire program until user input
+    //   objectDistance = Serial.parseInt();
+    //   Robot = EXECUTING;
+    // }
   }
 
   if (Robot == EXECUTING) {
     // Serial.println("State: Executing");
-    checkDistance();
-    if (distance < stuck) {
-      Robot = WAITING;
-      robotDirection = STATIONARY;
-    }
-    
+
+
+
+
+
     if (distanceCM > 0) {
+      checkDistance();
+      if (distance < stuck) {
+        Serial.println("Stuck");
+        Robot = WAITING;
+        robotDirection = STATIONARY;
+      }
+
       robotDirection = FORWARDS;
       moveRobot(distanceCM);
 
@@ -129,25 +132,32 @@ void loop() {
       moveRobot(turn);
     }
 
-    if (objectDistance > 0) {
-      if (distance > objectDistance) {
-        analogWrite(motorLeftB, 0);               // Motor On, swap for other direction
-        analogWrite(motorLeftA, leftMotorSpeed);  // Motor On, swap for other direction
-        analogWrite(motorRightB, 0);               // Motor On, swap for other direction
-        analogWrite(motorRightA, rightMotorSpeed);  // Motor On, swap for other direction
-      } else {
-        Robot = WAITING;
-        robotDirection = STATIONARY;
-      }
-
-
-    }
-
     if ((leftDirection == leftSTATIONARY) && (rightDirection == rightSTATIONARY)) {
+      //Serial.println("Reset");
       Robot = WAITING;
       robotDirection = STATIONARY;
       // Serial.println(Robot, robotDirection);
     }
+
+    // if (objectDistance > 0) {
+    //   Serial.println("ObjectDistance if");
+    //   if (distance > objectDistance) {
+    //     Serial.println("ObjectDistance double if");
+    //     leftDirection = leftFORWARDS;
+    //     rightDirection = rightFORWARDS;
+    //     analogWrite(motorLeftB, 0);               // Motor On, swap for other direction
+    //     analogWrite(motorLeftA, leftMotorSpeed);  // Motor On, swap for other direction
+    //     analogWrite(motorRightB, 0);               // Motor On, swap for other direction
+    //     analogWrite(motorRightA, rightMotorSpeed);  // Motor On, swap for other direction
+    //   } else {
+    //     Serial.println("ObjectDistance exit!");
+    //     Robot = WAITING;
+    //     robotDirection = STATIONARY;
+    //     leftDirection = leftSTATIONARY;
+    //     rightDirection = rightSTATIONARY;
+    //     objectDistance = 0;
+    //   }
+    // }
 
 
     runWaitingLED();
@@ -158,7 +168,7 @@ void loop() {
 
 int getNumberOfSteps(int distance) {
   // Serial.println((distance / wheelCircumference) * 20);
-  return (distance / wheelCircumference) * 20;  // distance to encoder steps converter
+  return (distance / wheelCircumference) * 40;  // distance to encoder steps converter
 }
 
 void moveRobot(int distance) {
@@ -176,15 +186,20 @@ void moveRobot(int distance) {
   }
 
   if (robotDirection == CLOCKWISE) {
-    runLeftMotor(distance/9);
-    runRightMotor(-distance/9);
+    //Serial.println("CLOCKWISE");
+    runLeftMotor((distance / 5.6));
+    runRightMotor(-(distance / 4.5));
+    // runLeftMotor(40);
+    // runRightMotor(-40);
   }
 
   if (robotDirection == ANTICLOCKWISE) {
-    runLeftMotor(-distance/9);
-    runRightMotor(distance/9);
+    //Serial.println("ANTICLOCKWISE");
+    runLeftMotor((distance / 5.6));
+    runRightMotor(-(distance / 4.5));
+    // runLeftMotor(-40);
+    // runRightMotor(40);
   }
-
 }
 
 void runLeftMotor(int leftDistance) {
@@ -198,7 +213,7 @@ void runLeftMotor(int leftDistance) {
       analogWrite(motorLeftA, leftMotorSpeed);  // Motor On, swap for other direction
 
       encoderLeftState = digitalRead(encoderLeft);
-      if ((encoderLeftState == HIGH) && (encoderLeftStateOld == LOW)) {
+      if ((encoderLeftState == HIGH) && (encoderLeftStateOld == LOW) || (encoderLeftState == LOW) && (encoderLeftStateOld == HIGH)) {
         encoderLeftCount++;
       }
       encoderLeftStateOld = encoderLeftState;
@@ -220,7 +235,7 @@ void runLeftMotor(int leftDistance) {
       analogWrite(motorLeftB, leftMotorSpeed);  // Motor On, swap for other direction
 
       encoderLeftState = digitalRead(encoderLeft);
-      if ((encoderLeftState == HIGH) && (encoderLeftStateOld == LOW)) {
+      if ((encoderLeftState == HIGH) && (encoderLeftStateOld == LOW) || (encoderLeftState == LOW) && (encoderLeftStateOld == HIGH)) {
         encoderLeftCount++;
       }
       encoderLeftStateOld = encoderLeftState;
@@ -254,7 +269,7 @@ void runRightMotor(int rightDistance) {
       analogWrite(motorRightA, rightMotorSpeed);  // Motor On, swap for other direction
 
       encoderRightState = digitalRead(encoderRight);
-      if ((encoderRightState == HIGH) && (encoderRightStateOld == LOW)) {
+      if ((encoderRightState == HIGH) && (encoderRightStateOld == LOW) || (encoderRightState == LOW) && (encoderRightStateOld == HIGH)) {
         encoderRightCount++;
       }
       encoderRightStateOld = encoderRightState;
@@ -277,7 +292,7 @@ void runRightMotor(int rightDistance) {
       analogWrite(motorRightB, rightMotorSpeed);  // Motor On, swap for other direction
 
       encoderRightState = digitalRead(encoderRight);
-      if ((encoderRightState == HIGH) && (encoderRightStateOld == LOW)) {
+      if ((encoderRightState == HIGH) && (encoderRightStateOld == LOW) || (encoderRightState == LOW) && (encoderRightStateOld == HIGH)) {
         encoderRightCount++;
       }
       encoderRightStateOld = encoderRightState;

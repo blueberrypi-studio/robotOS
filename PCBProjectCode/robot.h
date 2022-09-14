@@ -87,7 +87,7 @@ int distance;   // variable for the distance measurement
 int distanceCM;
 int objectDistance = 0;
 int turn;
-int stuck = 1;
+int stuck = 5;
 
 // =================================
 
